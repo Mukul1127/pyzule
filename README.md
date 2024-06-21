@@ -8,7 +8,7 @@ open an issue for any feature requests!
 
 - **generate and use [shareable `.pyzule` files](https://github.com/asdfzxcvbn/pyzule-gen) to configure IPAs!**
 - inject deb, dylib, framework, bundle, and appex files and automatically fix dependencies when possible
-- automatically fix dependencies on CydiaSubstrate, Cephei*, Orion, librocketbootstrap, libmryipc, and libhdev
+- automatically fix dependencies on Ellekit, Cephei*, Orion, librocketbootstrap, libmryipc, and libhdev
 - copy any unknown file/folder types to app root
 - use a custom compression level
 - change app name, version, and bundle id
@@ -23,7 +23,6 @@ open an issue for any feature requests!
 - use custom entitlements for the app
 - merge a plist into the app's existing Info.plist
 - inject into @executable_path instead of @rpath
-- use ellekit (open source) only instead of CydiaSubstrate
 
 ## usage
 you can get usage info with `pyzule -h`.
