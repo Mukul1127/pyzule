@@ -64,8 +64,6 @@ parser.add_argument("-g", action="store_true",
                     help="remove encrypted extensions")  # HELP I LITERALLY DONT KNOW WHAT TO NAME THE FLAGS ANYMORE
 parser.add_argument("-p", action="store_true",
                     help="inject into @executable_path")
-parser.add_argument("-t", action="store_true",
-                    help="use substitute instead of substrate")
 args = parser.parse_args()
 
 # sanitize paths
@@ -82,10 +80,6 @@ elif not os.path.exists(args.i):
     parser.error(f"{args.i} does not exist")
 elif not any((args.z, args.f, args.u, args.w, args.m, args.d, args.n, args.v, args.b, args.s, args.e, args.r, args.x, args.l, args.g)):
     parser.error("at least one option to modify the ipa must be present")
-elif args.p and args.t:
-    # well, you know, you CAN, but i just dont wanna implement that.
-    # i would remove -p altogether but i already spent a considerable amount of time on it.
-    parser.error("sorry, you can't use substitute while injecting into @executable_path")
 elif args.m and any(char not in "0123456789." for char in args.m):
     parser.error(f"invalid OS version: {args.m}")
 elif args.z and not os.path.isfile(args.z):
@@ -157,9 +151,6 @@ if args.f:
     else:
         inject_path = "Frameworks"
         inject_path_exec = "@rpath"
-
-    if args.t:
-        print("[*] will use substitute instead of substrate")
 
 os.makedirs(REAL_EXTRACT_DIR, exist_ok=True)
 
@@ -363,7 +354,7 @@ if args.f:
     args.f = set(args.f)
     needed = set()
     deps_info = {
-        "substrate.": "CydiaSubstrate.framework/CydiaSubstrate",
+        "substrate.": "libellekit.dylib",
         "librocketbootstrap.": "librocketbootstrap.dylib",
         "libmryipc.": "libmryipc.dylib",
         "cephei.": "Cephei.framework/Cephei",
@@ -371,9 +362,6 @@ if args.f:
         "cepheiprefs.": "CepheiPrefs.framework/CepheiPrefs",
         "libhdev.": "libhdev.framework/libhdev"
     }
-
-    if args.t:
-        deps_info["substrate."] = "Substitute.framework/Substitute"
 
     # remove codesign + fix all dependencies
     for dylib in dylibs:
@@ -439,30 +427,17 @@ if args.f:
     # yeah yeah, i know this fails if -p is used and dependencies need both substrate and rocketbootstrap,
     # but why would **anyone** be using -p in the first place? i dont see a reason to fix it.
     if "librocketbootstrap." in needed and "substrate." not in needed:
-        if args.p or not args.t:
-            if args.p:
-                run("install_name_tool -change @rpath/CydiaSubstrate.framework/CydiaSubstrate " +
-                f"@executable_path/CydiaSubstrate.framework/CydiaSubstrate '{os.path.join(APP_PATH, inject_path)}/librocketbootstrap.dylib'",
-                shell=True, executable="bash", check=True, stdout=DEVNULL, stderr=DEVNULL)  # is this how im supposed to do it?
-                print("[*] fixed dependency in librocketbootstrap.dylib: @rpath/CydiaSubstrate.framework/CydiaSubstrate -> @executable_path/CydiaSubstrate.framework/CydiaSubstrate")
-            if os.path.exists(os.path.join(APP_PATH, inject_path, "CydiaSubstrate.framework")):
-                print("[*] existing CydiaSubstrate.framework found, replacing")
-                rmtree(os.path.join(APP_PATH, inject_path, "CydiaSubstrate.framework"))
+        run("install_name_tool -change @rpath/CydiaSubstrate.framework/CydiaSubstrate " +
+        f"@rpath/libellekit.dylib '{os.path.join(APP_PATH, inject_path)}/librocketbootstrap.dylib'",
+        shell=True, executable="bash", check=True, stdout=DEVNULL, stderr=DEVNULL)  # repeating code? whaaat? nooo!!!
+        print("[*] fixed dependency in librocketbootstrap.dylib: @rpath/CydiaSubstrate.framework/CydiaSubstrate -> @rpath/libellekit.dylib")
 
-            copytree(os.path.join(USER_DIR, "CydiaSubstrate.framework"), os.path.join(APP_PATH, inject_path, "CydiaSubstrate.framework"))
-            print("[*] auto-injected CydiaSubstrate.framework")
-        elif args.t:
-            run("install_name_tool -change @rpath/CydiaSubstrate.framework/CydiaSubstrate " +
-            f"@rpath/Substitute.framework/Substitute '{os.path.join(APP_PATH, inject_path)}/librocketbootstrap.dylib'",
-            shell=True, executable="bash", check=True, stdout=DEVNULL, stderr=DEVNULL)  # repeating code? whaaat? nooo!!!
-            print("[*] fixed dependency in librocketbootstrap.dylib: @rpath/CydiaSubstrate.framework/CydiaSubstrate -> @rpath/Substitute.framework/Substitute")
+        if os.path.exists(os.path.join(APP_PATH, inject_path, "libellekit.dylib")):
+            print("[*] existing libellekit.dylib found, replacing")
+            rmtree(os.path.join(APP_PATH, inject_path, "libellekit.dylib"))
 
-            if os.path.exists(os.path.join(APP_PATH, inject_path, "Substitute.framework")):
-                print("[*] existing Substitute.framework found, replacing")
-                rmtree(os.path.join(APP_PATH, inject_path, "Substitute.framework"))
-
-            copytree(os.path.join(USER_DIR, "Substitute.framework"), os.path.join(APP_PATH, inject_path, "Substitute.framework"))
-            print("[*] auto-injected Substitute.framework")
+        copytree(os.path.join(USER_DIR, "libellekit.dylib"), os.path.join(APP_PATH, inject_path, "libellekit.dylib"))
+        print("[*] auto-injected libellekit.dylib")
 
     for d in dylibs:
         actual_path = os.path.join(DYLIBS_PATH, os.path.basename(d))
