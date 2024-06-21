@@ -23,7 +23,7 @@ open an issue for any feature requests!
 - use custom entitlements for the app
 - merge a plist into the app's existing Info.plist
 - inject into @executable_path instead of @rpath
-- use substitute (open source) instead of CydiaSubstrate
+- use ellekit (open source) only instead of CydiaSubstrate
 
 ## usage
 you can get usage info with `pyzule -h`.
@@ -32,7 +32,7 @@ you can get usage info with `pyzule -h`.
 $ pyzule -h
 usage: pyzule [-h] [-i input] [-o output] [-z .pyzule] [-n name] [-v version] [-b bundle id] [-m minimum]
               [-c [level]] [-k icon] [-x entitlements] [-l plist] [-r url [url ...]] [-f files [files ...]]
-              [-u] [-w] [-d] [-s] [-e] [-g] [-p] [-t] [-q] [--update]
+              [-u] [-w] [-d] [-s] [-e] [-g] [-p] [-q] [--update]
 
 an azule "clone" written in python3.
 
@@ -58,7 +58,6 @@ options:
   -e                    remove app extensions
   -g                    remove encrypted extensions
   -p                    inject into @executable_path
-  -t                    use substitute instead of substrate
   -q                    thin all binaries to arm64
   --update              check for updates
 ```
