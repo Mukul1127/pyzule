@@ -481,7 +481,7 @@ if args.f:
     # yeah yeah, i know this fails if -p is used and dependencies need both substrate and rocketbootstrap,
     # but why would **anyone** be using -p in the first place? i dont see a reason to fix it.
     if "librocketbootstrap." in needed and "substrate." not in needed:
-        run("install_name_tool -change @rpath/libellekit.dylib " +
+        run("install_name_tool -change @rpath/CydiaSubstrate.framework/CydiaSubstrate " +
         f"@rpath/libellekit.dylib '{os.path.join(APP_PATH, inject_path)}/librocketbootstrap.dylib'",
         shell=True, check=True, stdout=DEVNULL, stderr=DEVNULL)  # repeating code? whaaat? nooo!!!
         print("[*] fixed dependency in librocketbootstrap.dylib: @rpath/CydiaSubstrate.framework/CydiaSubstrate -> @rpath/libellekit.dylib")
